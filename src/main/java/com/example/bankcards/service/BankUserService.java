@@ -1,12 +1,13 @@
 package com.example.bankcards.service;
 
+import com.example.bankcards.dto.RegistrationRequest;
 import com.example.bankcards.entity.user.BankUser;
+import com.example.bankcards.entity.user.Role;
 import com.example.bankcards.exception.exceptions.UserAlreadyExistsException;
 import com.example.bankcards.repository.BankUserRepo;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
@@ -40,10 +41,6 @@ public class BankUserService {
         } else {
             throw new UserAlreadyExistsException("User does not exist");
         }
-    }
-
-    public UserDetailsService userDetailsService() {
-        return this::getByUsername;
     }
 
     public BankUser getCurrentUser() {

@@ -6,17 +6,16 @@ import com.example.bankcards.dto.RegistrationRequest;
 import com.example.bankcards.entity.user.BankUser;
 import com.example.bankcards.entity.user.Role;
 import com.example.bankcards.exception.exceptions.EmptyCredentialsException;
-import com.example.bankcards.exception.exceptions.RegistrationException;
+import com.example.bankcards.exception.exceptions.InvalidUserDataException;
 import com.example.bankcards.exception.exceptions.UserAlreadyExistsException;
 import com.example.bankcards.exception.exceptions.UserDoesNotExistsException;
-import com.example.bankcards.util.JwtUtil;
 import com.example.bankcards.util.BankUserValidator;
+import com.example.bankcards.util.JwtUtil;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -27,8 +26,8 @@ public class AuthService {
 
     private final BankUserService bankUserService;
     private final JwtUtil jwtUtil;
-    private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
+    private final PasswordEncoder passwordEncoder;
 
     public AuthResponse register(RegistrationRequest authRequest) {
         validateRegisterRequest(authRequest);
@@ -53,12 +52,8 @@ public class AuthService {
                         authRequest.getPassword()
                 ));
 
-        UserDetails userDetails = bankUserService
-                .userDetailsService()
-                .loadUserByUsername(authentication.getName());
-
         log.info("User is authenticated");
-        String jwt = jwtUtil.generateToken(userDetails.getUsername());
+        String jwt = jwtUtil.generateToken(authentication.getName());
         log.info("Generated JWT token: {}", jwt);
         return new AuthResponse(jwt);
     }
@@ -74,7 +69,7 @@ public class AuthService {
             if (!valid) {
                 throw new EmptyCredentialsException("Username or password is empty");
             } else if (!validFirstName || !validLastName) {
-                throw new RegistrationException("First name and last name can't be empty");
+                throw new InvalidUserDataException("First name and last name can't be empty");
             }
         }
     }

@@ -2,6 +2,7 @@ package com.example.bankcards.security;
 
 import com.example.bankcards.service.BankUserService;
 import com.example.bankcards.util.JwtUtil;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -14,12 +15,14 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.Map;
 
 @Component
 @AllArgsConstructor
@@ -28,7 +31,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     public static final String BEARER_PREFIX = "Bearer ";
     public static final String HEADER_NAME = "Authorization";
     private final JwtUtil jwtUtil;
-    private final BankUserService bankUserService;
+    private final UserDetailsService userDetailsService;
 
     @Override
     protected void doFilterInternal(
@@ -50,14 +53,16 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             var username = jwtUtil.extractUserName(jwt);
 
             if (StringUtils.isNotEmpty(username) && SecurityContextHolder.getContext().getAuthentication() == null) {
-                UserDetails userDetails = bankUserService
-                        .userDetailsService()
+                UserDetails userDetails = userDetailsService
                         .loadUserByUsername(username);
 
                 // Если токен валиден, то аутентифицируем пользователя
                 if (jwtUtil.isTokenValid(jwt, userDetails)) {
                     UsernamePasswordAuthenticationToken authenticationToken =
-                            new UsernamePasswordAuthenticationToken(userDetails, userDetails.getPassword(), userDetails.getAuthorities());
+                            new UsernamePasswordAuthenticationToken(
+                                    userDetails,
+                                    null,
+                                    userDetails.getAuthorities());
 
                     authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                     SecurityContextHolder.getContext().setAuthentication(authenticationToken);
@@ -74,7 +79,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         } catch (Exception e) {
             log.error("Unexpected error in JwtAuthenticationFilter: {}", e.getMessage(), e);
-            sendErrorResponse(response, "An unexpected error occurred", HttpStatus.INTERNAL_SERVER_ERROR.value());
+            sendErrorResponse(response, "An unexpected error occurred",
+                    HttpStatus.INTERNAL_SERVER_ERROR.value());
             return;
         }
         filterChain.doFilter(request, response);
@@ -84,6 +90,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         response.setStatus(status);
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
-        response.getWriter().write(message);
+        response.getWriter().write("{\"error\": \"" + message + "\"}");
     }
 }

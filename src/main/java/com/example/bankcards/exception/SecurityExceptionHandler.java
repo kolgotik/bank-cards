@@ -1,5 +1,6 @@
 package com.example.bankcards.exception;
 
+import com.example.bankcards.exception.exceptions.InvalidUserDataException;
 import com.example.bankcards.exception.exceptions.LoginException;
 import com.example.bankcards.exception.exceptions.RegistrationException;
 import com.example.bankcards.exception.exceptions.UserAlreadyExistsException;
@@ -18,7 +19,8 @@ public class SecurityExceptionHandler {
 
     @ExceptionHandler({
             JwtException.class,
-            LoginException.class
+            LoginException.class,
+            InvalidUserDataException.class
     })
     public ResponseEntity<String> handleSecurityExceptions(RuntimeException ex) {
         HttpStatus status;
@@ -26,7 +28,10 @@ public class SecurityExceptionHandler {
             status = HttpStatus.UNAUTHORIZED;
         } else if (ex instanceof LoginException) {
             status = HttpStatus.UNAUTHORIZED;
-        } else {
+        } else if (ex instanceof InvalidUserDataException) {
+            status = HttpStatus.UNPROCESSABLE_ENTITY;
+        }
+        else {
             status = HttpStatus.FORBIDDEN;
         }
         return new ResponseEntity<>(ex.getMessage(), status);
