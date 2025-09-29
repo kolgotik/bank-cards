@@ -1,9 +1,9 @@
 # Здесь будет OpenAPI описание всех доступных эндпоинтов и моделей данных.
-openapi: "3.0.1"
+openapi: "3.1.0"
 info:
-  title: Bank Cards Admin API
+  title: Bank Cards API
   version: 1.0.0
-  description: API for managing bank cards by admin users
+  description: API for managing bank cards
 servers:
   - url: http://localhost:8080
     description: Local development server
@@ -17,6 +17,8 @@ paths:
         - Admin Card Management
       summary: Get all cards with pagination
       description: Returns a paginated list of all cards in the system.
+      security:
+        - bearerAuth: [ ]
       parameters:
         - name: page
           in: query
@@ -58,6 +60,8 @@ paths:
         - Admin Card Management
       summary: Create a new card
       description: Creates a new card for a user.
+      security:
+        - bearerAuth: [ ]
       requestBody:
         required: true
         content:
@@ -98,6 +102,8 @@ paths:
         - Admin Card Management
       summary: Get card by ID
       description: Returns a specific card by its ID.
+      security:
+        - bearerAuth: [ ]
       parameters:
         - name: id
           in: path
@@ -130,6 +136,42 @@ paths:
               schema:
                 type: string
 
+    delete:
+      tags:
+        - Admin Card Management
+      summary: Delete a card
+      description: Deletes a card by its ID.
+      security:
+        - bearerAuth: [ ]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Card deleted successfully
+        '403':
+          description: Forbidden - user is not an admin
+          content:
+            application/json:
+              schema:
+                type: string
+        '404':
+          description: Card not found
+          content:
+            application/json:
+              schema:
+                type: string
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: string
+
+
   /api/admin/card/{id}/block:
     patch:
       tags:
@@ -137,6 +179,8 @@ paths:
       operationId: blockCard
       summary: Block a card
       description: Blocks a card by its ID.
+      security:
+        - bearerAuth: [ ]
       parameters:
         - name: id
           in: path
@@ -182,6 +226,8 @@ paths:
       operationId: unblockCard
       summary: Unblock a card
       description: Unblocks a card by its ID.
+      security:
+        - bearerAuth: [ ]
       parameters:
         - name: id
           in: path
@@ -220,38 +266,6 @@ paths:
               schema:
                 type: string
 
-    delete:
-      tags:
-        - Admin Card Management
-      summary: Delete a card
-      description: Deletes a card by its ID.
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: integer
-      responses:
-        '204':
-          description: Card deleted successfully
-        '403':
-          description: Forbidden - user is not an admin
-          content:
-            application/json:
-              schema:
-                type: string
-        '404':
-          description: Card not found
-          content:
-            application/json:
-              schema:
-                type: string
-        '500':
-          description: Internal server error
-          content:
-            application/json:
-              schema:
-                type: string
 
   /api/admin/make-admin/{id}:
     patch:
@@ -259,6 +273,8 @@ paths:
         - Admin User Management
       summary: Grant admin role to user
       description: Grants the ADMIN role to a user with the given ID.
+      security:
+        - bearerAuth: [ ]
       parameters:
         - name: id
           in: path
@@ -293,6 +309,8 @@ paths:
         - Admin User Management
       summary: Create a new user
       description: Registers a new user with the provided details.
+      security:
+        - bearerAuth: [ ]
       requestBody:
         required: true
         content:
@@ -603,6 +621,12 @@ paths:
 
 
 components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
   schemas:
     CardDTO:
       type: object
@@ -622,7 +646,7 @@ components:
           enum:
             - ACTIVE
             - BLOCKED
-            - DELETED
+            - EXPIRED
           example: "ACTIVE"
         balance:
           type: number
@@ -639,7 +663,7 @@ components:
       properties:
         cardNumber:
           type: string
-          example: "4111-1111-1111-1111"
+          example: "4000-1111-1111-1111"
         userId:
           type: integer
           example: 1
@@ -671,6 +695,7 @@ components:
         - password
         - firstName
         - lastName
+
     AuthRequest:
       type: object
       properties:

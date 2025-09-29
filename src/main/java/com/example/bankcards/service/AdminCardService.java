@@ -76,7 +76,7 @@ public class AdminCardService {
         }
         card.setStatus(CardStatus.BLOCKED);
         Card save = cardRepo.save(card);
-        return CardDTO.builder().status(save.getStatus()).build();
+        return CardDTO.fromEntity(save);
     }
 
     @Transactional
@@ -88,7 +88,7 @@ public class AdminCardService {
         }
         card.setStatus(CardStatus.ACTIVE);
         Card save = cardRepo.save(card);
-        return CardDTO.builder().status(save.getStatus()).build();
+        return CardDTO.fromEntity(save);
     }
 
     @Transactional

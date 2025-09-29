@@ -7,7 +7,7 @@ import com.example.bankcards.dto.RegistrationRequest;
 import com.example.bankcards.exception.exceptions.EmptyCredentialsException;
 import com.example.bankcards.exception.exceptions.RegistrationException;
 import com.example.bankcards.exception.exceptions.UserAlreadyExistsException;
-import com.example.bankcards.exception.exceptions.UserDoesNotExistsException;
+import com.example.bankcards.exception.exceptions.UserDoesNotExistException;
 import com.example.bankcards.service.AuthService;
 import com.example.bankcards.service.BankUserService;
 import com.example.bankcards.util.BankUserValidator;
@@ -175,7 +175,7 @@ class AuthControllerTest {
         when(authService.login(argThat(r ->
                 "nonexisting".equals(r.getUsername()) &&
                         "pass".equals(r.getPassword())
-        ))).thenThrow(new UserDoesNotExistsException("User does not exist"));
+        ))).thenThrow(new UserDoesNotExistException("User does not exist"));
 
         mockMvc.perform(post("/api/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)

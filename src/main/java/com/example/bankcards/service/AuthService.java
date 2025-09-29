@@ -8,7 +8,7 @@ import com.example.bankcards.entity.user.Role;
 import com.example.bankcards.exception.exceptions.EmptyCredentialsException;
 import com.example.bankcards.exception.exceptions.InvalidUserDataException;
 import com.example.bankcards.exception.exceptions.UserAlreadyExistsException;
-import com.example.bankcards.exception.exceptions.UserDoesNotExistsException;
+import com.example.bankcards.exception.exceptions.UserDoesNotExistException;
 import com.example.bankcards.util.BankUserValidator;
 import com.example.bankcards.util.JwtUtil;
 import lombok.AllArgsConstructor;
@@ -83,7 +83,7 @@ public class AuthService {
         }
         boolean exists = bankUserService.existsByUsername(request.getUsername());
         if (!exists) {
-            throw new UserDoesNotExistsException("User does not exist");
+            throw new UserDoesNotExistException("User does not exist");
         }
     }
 }

@@ -92,7 +92,7 @@ public class CardService {
         Card card = cardRepo.findById(id).orElseThrow(
                 () -> new CardDoesNotExistException("Card does not exist"));
         validateCardOwnership(card, bankUser.getId());
-        return CardDTO.builder().balance(card.getBalance()).build();
+        return CardDTO.fromEntity(card);
     }
 
     private void validateCardStatus(Card card) {
@@ -108,7 +108,7 @@ public class CardService {
     }
 
     @Scheduled(cron = "0 0 0 * * ?")
-    private void updateExpiredCards() {
+    void updateExpiredCards() {
         LocalDate today = LocalDate.now();
         List<Card> activeCards = cardRepo.findByStatusAndExpirationDateBefore(
                 CardStatus.ACTIVE,

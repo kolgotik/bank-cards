@@ -21,11 +21,3 @@ CREATE TABLE IF NOT EXISTS cards (
     user_id BIGINT,
     FOREIGN KEY (user_id) REFERENCES users(id)
 );
-
---changeset kolgotik:3
-CREATE TABLE IF NOT EXISTS admins (
-    id SERIAL PRIMARY KEY,
-    username VARCHAR(255) NOT NULL,
-    password VARCHAR(255) NOT NULL,
-    role VARCHAR(255) NOT NULL
-);

@@ -139,6 +139,6 @@ class AuthServiceTest {
         when(bankUserService.existsByUsername("testuser")).thenReturn(false);
 
         // Act & Assert
-        assertThrows(UserDoesNotExistsException.class, () -> authService.login(request));
+        assertThrows(UserDoesNotExistException.class, () -> authService.login(request));
     }
 }
