@@ -21,7 +21,7 @@ public class JwtUtil {
     @Value("${jwt.secret}")
     private String SECRET;
 
-    private final Date EXPIRATION = new Date(System.currentTimeMillis() + 1000 * 60 * 10);
+    private final Date EXPIRATION = new Date(System.currentTimeMillis() + 1000 * 60 * 30);
 
     public String generateToken(String username) {
         Map<String, Object> claims = new HashMap<>();

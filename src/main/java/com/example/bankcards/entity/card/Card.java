@@ -6,7 +6,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.math.BigDecimal;
-import java.util.Date;
+import java.time.LocalDate;
 
 @Table(name = "cards")
 @Entity
@@ -28,7 +28,7 @@ public class Card {
     private String ownerName;
 
     @Column(nullable = false)
-    private Date expirationDate;
+    private LocalDate expirationDate;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)

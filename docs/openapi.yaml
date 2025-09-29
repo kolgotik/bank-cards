@@ -1,1 +1,711 @@
 # Здесь будет OpenAPI описание всех доступных эндпоинтов и моделей данных.
+openapi: "3.0.1"
+info:
+  title: Bank Cards Admin API
+  version: 1.0.0
+  description: API for managing bank cards by admin users
+servers:
+  - url: http://localhost:8080
+    description: Local development server
+tags:
+  - name: Admin Card Management
+    description: Endpoints for managing cards by admin users
+paths:
+  /api/admin/cards:
+    get:
+      tags:
+        - Admin Card Management
+      summary: Get all cards with pagination
+      description: Returns a paginated list of all cards in the system.
+      parameters:
+        - name: page
+          in: query
+          description: Results page you want to retrieve (0..N)
+          required: false
+          schema:
+            type: integer
+            default: 0
+        - name: size
+          in: query
+          description: Number of records per page
+          required: false
+          schema:
+            type: integer
+            default: 20
+      responses:
+        '200':
+          description: Cards found successfully
+          content:
+            application/json:
+              schema:
+                type: object
+        '403':
+          description: Forbidden - user is not an admin
+          content:
+            application/json:
+              schema:
+                type: string
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: string
+
+  /api/admin/card:
+    post:
+      tags:
+        - Admin Card Management
+      summary: Create a new card
+      description: Creates a new card for a user.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CardCreationRequest'
+      responses:
+        '200':
+          description: Card created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CardDTO'
+        '409':
+          description: Card already exists
+        '422':
+          description: Invalid input data
+          content:
+            application/json:
+              schema:
+                type: string
+        '403':
+          description: Forbidden - user is not an admin
+          content:
+            application/json:
+              schema:
+                type: string
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: string
+
+  /api/admin/card/{id}:
+    get:
+      tags:
+        - Admin Card Management
+      summary: Get card by ID
+      description: Returns a specific card by its ID.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Card found successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CardDTO'
+        '403':
+          description: Forbidden - user is not an admin
+          content:
+            application/json:
+              schema:
+                type: string
+        '404':
+          description: Card not found
+          content:
+            application/json:
+              schema:
+                type: string
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: string
+
+  /api/admin/card/{id}/block:
+    patch:
+      tags:
+        - Admin Card Management
+      operationId: blockCard
+      summary: Block a card
+      description: Blocks a card by its ID.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Card blocked successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CardDTO'
+        '403':
+          description: Forbidden - user is not an admin
+          content:
+            application/json:
+              schema:
+                type: string
+        '404':
+          description: Card not found
+          content:
+            application/json:
+              schema:
+                type: string
+        '409':
+          description: Card is already blocked
+          content:
+            application/json:
+              schema:
+                type: string
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: string
+
+  /api/admin/card/{id}/unblock:
+    patch:
+      tags:
+        - Admin Card Management
+      operationId: unblockCard
+      summary: Unblock a card
+      description: Unblocks a card by its ID.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Card unblocked successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CardDTO'
+        '403':
+          description: Forbidden - user is not an admin
+          content:
+            application/json:
+              schema:
+                type: string
+        '404':
+          description: Card not found
+          content:
+            application/json:
+              schema:
+                type: string
+        '409':
+          description: Card is already active
+          content:
+            application/json:
+              schema:
+                type: string
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: string
+
+    delete:
+      tags:
+        - Admin Card Management
+      summary: Delete a card
+      description: Deletes a card by its ID.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Card deleted successfully
+        '403':
+          description: Forbidden - user is not an admin
+          content:
+            application/json:
+              schema:
+                type: string
+        '404':
+          description: Card not found
+          content:
+            application/json:
+              schema:
+                type: string
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: string
+
+  /api/admin/make-admin/{id}:
+    patch:
+      tags:
+        - Admin User Management
+      summary: Grant admin role to user
+      description: Grants the ADMIN role to a user with the given ID.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Role updated successfully
+        '403':
+          description: Forbidden - user is not an admin
+          content:
+            application/json:
+              schema:
+                type: string
+        '404':
+          description: User not found
+          content:
+            application/json:
+              schema:
+                type: string
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: string
+
+  /api/admin/user:
+    post:
+      tags:
+        - Admin User Management
+      summary: Create a new user
+      description: Registers a new user with the provided details.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegistrationRequest'
+      responses:
+        '200':
+          description: User created successfully
+        '403':
+          description: Forbidden - user is not an admin
+          content:
+            application/json:
+              schema:
+                type: string
+        '409':
+          description: Username already exists
+        '422':
+          description: Invalid input data
+          content:
+            application/json:
+              schema:
+                type: string
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: string
+
+  /api/auth/login:
+    post:
+      tags:
+        - Authentication
+      summary: User login
+      description: Authenticates a user and returns a JWT token.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuthRequest'
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '401':
+          description: Unauthorized - invalid credentials
+          content:
+            application/json:
+              schema:
+                type: string
+        '403':
+          description: Forbidden - user is not authorized
+          content:
+            application/json:
+              schema:
+                type: string
+        '422':
+          description: Invalid input data
+          content:
+            application/json:
+              schema:
+                type: string
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: string
+
+  /api/auth/register:
+    post:
+      tags:
+        - Authentication
+      summary: Register a new user
+      description: Registers a new user and returns a JWT token.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegistrationRequest'
+      responses:
+        '200':
+          description: Registration successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '409':
+          description: Username already exists
+        '422':
+          description: Invalid input data
+          content:
+            application/json:
+              schema:
+                type: string
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: string
+
+
+  /api/card/transfer:
+    post:
+      tags:
+        - User Card Management
+      summary: Transfer money between cards
+      description: Transfers money from one card to another.
+      security:
+        - bearerAuth: [ ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TransferRequest'
+      responses:
+        '200':
+          description: Transfer completed successfully
+          content:
+            application/json:
+              schema:
+                type: string
+        '400':
+          description: Invalid transfer request
+          content:
+            application/json:
+              schema:
+                type: string
+        '401':
+          description: Unauthorized - missing or invalid token
+          content:
+            application/json:
+              schema:
+                type: string
+        '403':
+          description: Forbidden - insufficient permissions
+          content:
+            application/json:
+              schema:
+                type: string
+        '404':
+          description: Source or target card not found
+          content:
+            application/json:
+              schema:
+                type: string
+        '409':
+          description: Insufficient balance
+          content:
+            application/json:
+              schema:
+                type: string
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: string
+
+  /api/card/{id}/request-block:
+    patch:
+      tags:
+        - User Card Management
+      summary: Request to block a card
+      description: Sends a request to block a card by its ID.
+      security:
+        - bearerAuth: [ ]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Request to block card sent successfully
+          content:
+            application/json:
+              schema:
+                type: string
+        '401':
+          description: Unauthorized - missing or invalid token
+          content:
+            application/json:
+              schema:
+                type: string
+        '403':
+          description: Forbidden - insufficient permissions
+          content:
+            application/json:
+              schema:
+                type: string
+        '404':
+          description: Card not found
+          content:
+            application/json:
+              schema:
+                type: string
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: string
+
+  /api/cards:
+    get:
+      tags:
+        - User Card Management
+      summary: Get all user's cards with pagination
+      description: Returns a paginated list of all cards owned by the current user.
+      security:
+        - bearerAuth: [ ]
+      parameters:
+        - name: page
+          in: query
+          description: Results page you want to retrieve (0..N)
+          required: false
+          schema:
+            type: integer
+            default: 0
+        - name: size
+          in: query
+          description: Number of records per page
+          required: false
+          schema:
+            type: integer
+            default: 20
+      responses:
+        '200':
+          description: Cards found successfully
+          content:
+            application/json:
+              schema:
+                type: object
+        '401':
+          description: Unauthorized - missing or invalid token
+          content:
+            application/json:
+              schema:
+                type: string
+        '403':
+          description: Forbidden - insufficient permissions
+          content:
+            application/json:
+              schema:
+                type: string
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: string
+
+  /api/card/balance/{id}:
+    get:
+      tags:
+        - User Card Management
+      summary: Get card balance by ID
+      description: Returns the balance of a specific card owned by the current user.
+      security:
+        - bearerAuth: [ ]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Card balance retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CardDTO'
+        '401':
+          description: Unauthorized - missing or invalid token
+          content:
+            application/json:
+              schema:
+                type: string
+        '403':
+          description: Forbidden - insufficient permissions
+          content:
+            application/json:
+              schema:
+                type: string
+        '404':
+          description: Card not found
+          content:
+            application/json:
+              schema:
+                type: string
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: string
+
+
+components:
+  schemas:
+    CardDTO:
+      type: object
+      properties:
+        cardNumber:
+          type: string
+          example: "**** **** **** 1234"
+        ownerName:
+          type: string
+          example: "John Doe"
+        expirationDate:
+          type: string
+          format: date
+          example: "2025-12-31"
+        status:
+          type: string
+          enum:
+            - ACTIVE
+            - BLOCKED
+            - DELETED
+          example: "ACTIVE"
+        balance:
+          type: number
+          example: 1500.00
+      required:
+        - cardNumber
+        - ownerName
+        - expirationDate
+        - status
+        - balance
+
+    CardCreationRequest:
+      type: object
+      properties:
+        cardNumber:
+          type: string
+          example: "4111-1111-1111-1111"
+        userId:
+          type: integer
+          example: 1
+        balance:
+          type: number
+          example: 1000.00
+      required:
+        - cardNumber
+        - userId
+        - balance
+
+    RegistrationRequest:
+      type: object
+      properties:
+        username:
+          type: string
+          example: "john_doe"
+        password:
+          type: string
+          example: "SecurePass123!"
+        firstName:
+          type: string
+          example: "John"
+        lastName:
+          type: string
+          example: "Doe"
+      required:
+        - username
+        - password
+        - firstName
+        - lastName
+    AuthRequest:
+      type: object
+      properties:
+        username:
+          type: string
+          example: "john_doe"
+        password:
+          type: string
+          example: "SecurePass123!"
+      required:
+        - username
+        - password
+
+    AuthResponse:
+      type: object
+      properties:
+        jwt:
+          type: string
+          example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.xxxxx"
+      required:
+        - jwt
+
+    TransferRequest:
+      type: object
+      properties:
+        sourceCardId:
+          type: integer
+          example: 1
+        targetCardId:
+          type: integer
+          example: 2
+        amount:
+          type: number
+          example: 500.00
+      required:
+        - sourceCardId
+        - targetCardId
+        - amount

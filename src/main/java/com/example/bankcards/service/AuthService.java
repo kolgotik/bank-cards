@@ -18,6 +18,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @Service
@@ -29,6 +30,7 @@ public class AuthService {
     private final AuthenticationManager authenticationManager;
     private final PasswordEncoder passwordEncoder;
 
+    @Transactional
     public AuthResponse register(RegistrationRequest authRequest) {
         validateRegisterRequest(authRequest);
         BankUser user = BankUser.builder()
@@ -44,6 +46,7 @@ public class AuthService {
         return new AuthResponse(jwt);
     }
 
+    @Transactional
     public AuthResponse login(AuthRequest authRequest) {
         validateLoginRequest(authRequest);
         Authentication authentication = authenticationManager
@@ -54,7 +57,6 @@ public class AuthService {
 
         log.info("User is authenticated");
         String jwt = jwtUtil.generateToken(authentication.getName());
-        log.info("Generated JWT token: {}", jwt);
         return new AuthResponse(jwt);
     }
 

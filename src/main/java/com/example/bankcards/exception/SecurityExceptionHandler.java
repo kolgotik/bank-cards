@@ -1,9 +1,6 @@
 package com.example.bankcards.exception;
 
-import com.example.bankcards.exception.exceptions.InvalidUserDataException;
-import com.example.bankcards.exception.exceptions.LoginException;
-import com.example.bankcards.exception.exceptions.RegistrationException;
-import com.example.bankcards.exception.exceptions.UserAlreadyExistsException;
+import com.example.bankcards.exception.exceptions.*;
 import io.jsonwebtoken.JwtException;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
@@ -30,9 +27,34 @@ public class SecurityExceptionHandler {
             status = HttpStatus.UNAUTHORIZED;
         } else if (ex instanceof InvalidUserDataException) {
             status = HttpStatus.UNPROCESSABLE_ENTITY;
-        }
-        else {
+        } else {
             status = HttpStatus.FORBIDDEN;
+        }
+        return new ResponseEntity<>(ex.getMessage(), status);
+    }
+
+    @ExceptionHandler({
+            CardException.class,
+            CardStatusException.class,
+            CardCreationException.class,
+            CardDoesNotExistException.class,
+            CardAlreadyExistsException.class,
+            InsufficientFundsException.class
+    })
+    public ResponseEntity<String> handleCardException(CardException ex) {
+        HttpStatus status;
+        if (ex instanceof CardStatusException) {
+            status = HttpStatus.CONFLICT;
+        } else if (ex instanceof CardAlreadyExistsException) {
+            status = HttpStatus.CONFLICT;
+        } else if (ex instanceof CardCreationException) {
+            status = HttpStatus.UNPROCESSABLE_ENTITY;
+        } else if (ex instanceof CardDoesNotExistException) {
+            status = HttpStatus.NOT_FOUND;
+        } else if (ex instanceof InsufficientFundsException) {
+            status = HttpStatus.UNPROCESSABLE_ENTITY;
+        } else {
+            status = HttpStatus.BAD_REQUEST;
         }
         return new ResponseEntity<>(ex.getMessage(), status);
     }
@@ -41,6 +63,7 @@ public class SecurityExceptionHandler {
     public ResponseEntity<String> handleAccessDeniedException() {
         return new ResponseEntity<>("Access denied", HttpStatus.FORBIDDEN);
     }
+
     @ExceptionHandler(BadCredentialsException.class)
     public ResponseEntity<String> handleBadCredentialsException() {
         return new ResponseEntity<>("Bad credentials", HttpStatus.UNAUTHORIZED);

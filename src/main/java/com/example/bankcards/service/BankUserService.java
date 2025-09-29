@@ -1,8 +1,7 @@
 package com.example.bankcards.service;
 
-import com.example.bankcards.dto.RegistrationRequest;
 import com.example.bankcards.entity.user.BankUser;
-import com.example.bankcards.entity.user.Role;
+import com.example.bankcards.exception.exceptions.CardCreationException;
 import com.example.bankcards.exception.exceptions.UserAlreadyExistsException;
 import com.example.bankcards.repository.BankUserRepo;
 import lombok.AllArgsConstructor;
@@ -11,6 +10,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 @Service
 @AllArgsConstructor
 @Slf4j
@@ -18,7 +19,7 @@ public class BankUserService {
 
     private final BankUserRepo bankUserRepo;
 
-    private BankUser saveUser(BankUser bankUser) {
+    public BankUser saveUser(BankUser bankUser) {
         return bankUserRepo.save(bankUser);
     }
 
@@ -34,13 +35,13 @@ public class BankUserService {
         return saveUser(bankUser);
     }
 
+    public Optional<BankUser> getById(Long id) {
+        return bankUserRepo.findById(id);
+    }
+
     public BankUser getByUsername(String username) {
-        if (bankUserRepo.existsByUsername(username)) {
-            return bankUserRepo.findByUsername(username)
-                    .orElseThrow(() -> new UsernameNotFoundException("User not found"));
-        } else {
-            throw new UserAlreadyExistsException("User does not exist");
-        }
+        return bankUserRepo.findByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
     }
 
     public BankUser getCurrentUser() {
