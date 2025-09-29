@@ -1,6 +1,7 @@
 package com.example.bankcards.entity.card;
 
 import com.example.bankcards.entity.user.BankUser;
+import com.example.bankcards.util.SimpleCardEncryptConverter;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -21,6 +22,7 @@ public class Card {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Convert(converter = SimpleCardEncryptConverter.class)
     @Column(name = "card_number", unique = true, nullable = false)
     private String cardNumber;
 
