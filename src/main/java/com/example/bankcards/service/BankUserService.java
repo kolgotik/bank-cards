@@ -1,7 +1,6 @@
 package com.example.bankcards.service;
 
 import com.example.bankcards.entity.user.BankUser;
-import com.example.bankcards.exception.exceptions.CardCreationException;
 import com.example.bankcards.exception.exceptions.UserAlreadyExistsException;
 import com.example.bankcards.repository.BankUserRepo;
 import lombok.AllArgsConstructor;

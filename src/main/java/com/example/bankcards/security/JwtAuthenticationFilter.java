@@ -1,8 +1,6 @@
 package com.example.bankcards.security;
 
-import com.example.bankcards.service.BankUserService;
 import com.example.bankcards.util.JwtUtil;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -22,7 +20,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.util.Map;
 
 @Component
 @AllArgsConstructor

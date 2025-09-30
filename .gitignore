@@ -1,5 +1,5 @@
 HELP.md
-README.md
+README_ТЗ.md
 target/
 .mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
