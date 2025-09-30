@@ -5,6 +5,7 @@ import com.example.bankcards.dto.CardDTO;
 import com.example.bankcards.entity.card.Card;
 import com.example.bankcards.entity.card.CardStatus;
 import com.example.bankcards.entity.user.BankUser;
+import com.example.bankcards.entity.user.Role;
 import com.example.bankcards.exception.exceptions.CardAlreadyExistsException;
 import com.example.bankcards.exception.exceptions.CardCreationException;
 import com.example.bankcards.exception.exceptions.CardDoesNotExistException;
@@ -43,6 +44,10 @@ public class AdminCardService {
 
         BankUser bankUser = bankUserService.getById(request.getUserId())
                 .orElseThrow(() -> new CardCreationException("User not found"));
+
+        if (bankUser.getRole().equals(Role.ADMIN)) {
+            throw new CardCreationException("Admin cannot own a card");
+        }
 
         Card card = new Card();
         card.setCardNumber(request.getCardNumber());

@@ -5,6 +5,7 @@ import com.example.bankcards.dto.CardDTO;
 import com.example.bankcards.entity.card.Card;
 import com.example.bankcards.entity.card.CardStatus;
 import com.example.bankcards.entity.user.BankUser;
+import com.example.bankcards.entity.user.Role;
 import com.example.bankcards.exception.exceptions.CardDoesNotExistException;
 import com.example.bankcards.repository.CardRepo;
 import com.example.bankcards.util.CardUtil;
@@ -71,6 +72,7 @@ class AdminCardServiceTest {
         when(bankUserService.getById(request.getUserId())).thenReturn(Optional.of(user));
         when(cardRepo.existsByCardNumber(request.getCardNumber())).thenReturn(false);
         when(cardRepo.save(any(Card.class))).thenReturn(card);
+        user.setRole(Role.USER);
 
         // Act
         CardDTO result = adminCardService.createCard(request);

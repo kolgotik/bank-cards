@@ -15,6 +15,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -42,18 +43,21 @@ class CardServiceTest {
     @Mock
     private Authentication authentication;
 
+    @Mock
+    private ApplicationEventPublisher publisher;
+
     private Card sourceCard;
     private Card targetCard;
+
+    @Mock
     private BankUser bankUser;
 
     @BeforeEach
     void setUp() {
-        // Mock user
         bankUser = new BankUser();
         bankUser.setId(1L);
         bankUser.setUsername("testuser");
 
-        // Mock cards
         sourceCard = new Card();
         sourceCard.setId(1L);
         sourceCard.setBalance(BigDecimal.valueOf(1000));
@@ -69,53 +73,48 @@ class CardServiceTest {
 
     @Test
     void testTransferBetweenCards_Success() {
-        // Arrange
         when(cardRepo.findById(1L)).thenReturn(Optional.of(sourceCard));
         when(cardRepo.findById(2L)).thenReturn(Optional.of(targetCard));
-
-        // Act
         when(authentication.getName()).thenReturn("testuser");
         when(bankUserService.getByUsername("testuser")).thenReturn(bankUser);
+
         cardService.transferBetweenCards(authentication, 1L, 2L, BigDecimal.valueOf(500));
 
-        // Assert
         assertEquals(BigDecimal.valueOf(500), sourceCard.getBalance());
         assertEquals(BigDecimal.valueOf(500), targetCard.getBalance());
+
         verify(cardRepo, times(1)).save(sourceCard);
         verify(cardRepo, times(1)).save(targetCard);
     }
 
     @Test
     void testTransferBetweenCards_SameCard() {
-        // Act & Assert
+        when(authentication.getName()).thenReturn("testuser");
+
         assertThrows(CardException.class, () -> cardService.transferBetweenCards(authentication, 1L, 1L, BigDecimal.ONE));
     }
 
     @Test
     void testTransferBetweenCards_SourceCardDoesNotExist() {
-        // Arrange
         when(cardRepo.findById(1L)).thenReturn(Optional.empty());
+        when(authentication.getName()).thenReturn("testuser");
 
-        // Act & Assert
         assertThrows(CardDoesNotExistException.class, () -> cardService.transferBetweenCards(authentication, 1L, 2L, BigDecimal.ONE));
     }
 
     @Test
     void testTransferBetweenCards_TargetCardDoesNotExist() {
-        // Arrange
         when(cardRepo.findById(1L)).thenReturn(Optional.of(sourceCard));
         when(cardRepo.findById(2L)).thenReturn(Optional.empty());
+        when(authentication.getName()).thenReturn("testuser");
 
-        // Act & Assert
         assertThrows(CardDoesNotExistException.class, () -> cardService.transferBetweenCards(authentication, 1L, 2L, BigDecimal.ONE));
     }
 
     @Test
     void testTransferBetweenCards_InvalidCardOwnership() {
-        // Arrange
         BankUser otherUser = new BankUser();
         otherUser.setId(2L);
-
         sourceCard.setBankUser(otherUser);
 
         when(cardRepo.findById(1L)).thenReturn(Optional.of(sourceCard));
@@ -129,8 +128,8 @@ class CardServiceTest {
 
     @Test
     void testTransferBetweenCards_CardIsBlocked() {
-        // Arrange
         sourceCard.setStatus(CardStatus.BLOCKED);
+
         when(cardRepo.findById(1L)).thenReturn(Optional.of(sourceCard));
         when(cardRepo.findById(2L)).thenReturn(Optional.of(targetCard));
         when(authentication.getName()).thenReturn("testuser");
@@ -142,7 +141,6 @@ class CardServiceTest {
 
     @Test
     void testTransferBetweenCards_InsufficientFunds() {
-        // Arrange
         when(cardRepo.findById(1L)).thenReturn(Optional.of(sourceCard));
         when(cardRepo.findById(2L)).thenReturn(Optional.of(targetCard));
         when(authentication.getName()).thenReturn("testuser");
@@ -156,9 +154,11 @@ class CardServiceTest {
     void testRequestBlockCard_Success() {
         // Arrange
         when(cardRepo.findById(1L)).thenReturn(Optional.of(sourceCard));
+        when(authentication.getName()).thenReturn(bankUser.getUsername());
+        when(bankUserService.getByUsername(bankUser.getUsername())).thenReturn(bankUser);
 
         // Act
-        cardService.requestBlockCard(1L);
+        cardService.requestBlockCard(authentication, 1L);
 
         // Assert
         assertEquals(CardStatus.BLOCKED, sourceCard.getStatus());
@@ -170,9 +170,11 @@ class CardServiceTest {
         // Arrange
         sourceCard.setStatus(CardStatus.BLOCKED);
         when(cardRepo.findById(1L)).thenReturn(Optional.of(sourceCard));
+        when(authentication.getName()).thenReturn(bankUser.getUsername());
+        when(bankUserService.getByUsername(bankUser.getUsername())).thenReturn(bankUser);
 
         // Act & Assert
-        assertThrows(CardStatusException.class, () -> cardService.requestBlockCard(1L));
+        assertThrows(CardStatusException.class, () -> cardService.requestBlockCard(authentication, 1L));
     }
 
     @Test
@@ -180,9 +182,11 @@ class CardServiceTest {
         // Arrange
         sourceCard.setStatus(CardStatus.EXPIRED);
         when(cardRepo.findById(1L)).thenReturn(Optional.of(sourceCard));
+        when(authentication.getName()).thenReturn(bankUser.getUsername());
+        when(bankUserService.getByUsername(bankUser.getUsername())).thenReturn(bankUser);
 
         // Act & Assert
-        assertThrows(CardStatusException.class, () -> cardService.requestBlockCard(1L));
+        assertThrows(CardStatusException.class, () -> cardService.requestBlockCard(authentication, 1L));
     }
 
     @Test
@@ -232,3 +236,4 @@ class CardServiceTest {
         assertThrows(CardException.class, () -> cardService.getCardBalanceById(authentication, 1L));
     }
 }
+

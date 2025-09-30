@@ -34,8 +34,9 @@ public class CardController {
 
     @PatchMapping("/card/{id}/request-block")
     @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<String> requestBlockCard(@PathVariable Long id) {
-        cardService.requestBlockCard(id);
+    public ResponseEntity<String> requestBlockCard(@PathVariable Long id,
+                                                   Authentication authentication) {
+        cardService.requestBlockCard(authentication, id);
         return ResponseEntity.ok("Request to block card sent successfully");
     }
 

@@ -66,9 +66,15 @@ public class CardService {
     }
 
     @Transactional
-    public void requestBlockCard(Long id) {
+    public void requestBlockCard(Authentication authentication, Long id) {
+        String name = authentication.getName();
+        BankUser bankUser = bankUserService.getByUsername(name);
+
         Card card = cardRepo.findById(id).orElseThrow(
                 () -> new CardDoesNotExistException("Card does not exist"));
+
+        validateCardOwnership(card, bankUser.getId());
+
         if (card.getStatus() == CardStatus.BLOCKED) {
             throw new CardStatusException("Card is already blocked");
         }
