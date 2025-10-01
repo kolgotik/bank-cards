@@ -8,7 +8,7 @@
 1. Выполните в корне проекта:
 
 ```bash
-docker-compose up --build
+docker compose up --build
    ```
 
 2. После запуска сервисы будут доступны:
@@ -31,6 +31,6 @@ docker-compose up --build
 * Для остановки контейнеров:
 
   ```bash
-  docker-compose down
+  docker compose down
   ```
 
