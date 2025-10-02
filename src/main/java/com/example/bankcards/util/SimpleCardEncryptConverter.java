@@ -7,6 +7,10 @@ import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
 import java.util.Base64;
 
+/**
+ * Converts between plain text and encrypted strings using AES-128 encryption.
+ * Used as a JPA attribute converter for fields that need to be stored securely.
+ */
 @Converter
 public class SimpleCardEncryptConverter implements AttributeConverter<String, String> {
 
@@ -14,6 +18,13 @@ public class SimpleCardEncryptConverter implements AttributeConverter<String, St
     private static final String SECRET = "1234567890ABCDEF";
     private static final SecretKeySpec KEY = new SecretKeySpec(SECRET.getBytes(), "AES");
 
+    /**
+     * Encrypts a string before persisting it to the database.
+     *
+     * @param attribute the original (plain text) value
+     * @return the Base64-encoded encrypted string
+     * @throws RuntimeException if encryption fails
+     */
     @Override
     public String convertToDatabaseColumn(String attribute) {
         if (attribute == null) return null;
@@ -26,6 +37,13 @@ public class SimpleCardEncryptConverter implements AttributeConverter<String, St
         }
     }
 
+    /**
+     * Decrypts a string retrieved from the database back into plain text.
+     *
+     * @param dbData the encrypted and Base64-encoded string from the database
+     * @return the decrypted plain text value
+     * @throws RuntimeException if decryption fails
+     */
     @Override
     public String convertToEntityAttribute(String dbData) {
         if (dbData == null) return null;

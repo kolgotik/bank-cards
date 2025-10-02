@@ -25,15 +25,34 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import java.util.Arrays;
 import java.util.List;
 
+/**
+ * Configures Spring Security for the application.
+ * Sets up authentication manager, password encoder, JWT filter, and request permissions.
+ */
 @Configuration
 @EnableMethodSecurity
 @EnableWebSecurity
 @AllArgsConstructor
 public class SecurityConfig {
 
+    /**
+     * Service responsible for loading user details from the database.
+     */
     private final UserDetailsService userDetailsService;
+
+    /**
+     * Filter that handles JWT-based authentication.
+     */
     private final JwtAuthenticationFilter jwtFilter;
 
+    /**
+     * Configures the security filter chain with rules for request authorization,
+     * disables CSRF protection, enables CORS, and adds the JWT filter.
+     *
+     * @param http the HTTP security builder
+     * @return configured security filter chain
+     * @throws Exception if an error occurs during configuration
+     */
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
@@ -59,11 +78,24 @@ public class SecurityConfig {
                 .build();
     }
 
+    /**
+     * Provides a BCrypt password encoder bean for secure password storage.
+     *
+     * @return a new instance of BCryptPasswordEncoder
+     */
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
+    /**
+     * Builds and returns an authentication manager using the provided user details service
+     * and password encoder.
+     *
+     * @param userDetailsService service to load user details
+     * @param passwordEncoder    encoder to use for passwords
+     * @return a configured AuthenticationManager
+     */
     @Bean
     public AuthenticationManager authenticationManager(UserDetailsService userDetailsService,
                                                        PasswordEncoder passwordEncoder) {
@@ -74,6 +106,12 @@ public class SecurityConfig {
         return new ProviderManager(authenticationProvider);
     }
 
+    /**
+     * Configures CORS (Cross-Origin Resource Sharing) settings for the application.
+     * Allows specific origins, methods, headers, and credentials.
+     *
+     * @return a configured CorsConfigurationSource
+     */
     private CorsConfigurationSource corsConfiguration() {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(List.of(

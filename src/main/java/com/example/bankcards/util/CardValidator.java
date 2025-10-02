@@ -3,8 +3,17 @@ package com.example.bankcards.util;
 import com.example.bankcards.dto.CardCreationRequest;
 import com.example.bankcards.entity.card.CardBINorIIN;
 
+/**
+ * Utility class for validating card-related data such as card creation requests and card numbers.
+ */
 public class CardValidator {
 
+    /**
+     * Validates a card creation request by checking if all required fields are present.
+     *
+     * @param request the card creation request to validate
+     * @return true if the request is valid, false otherwise
+     */
     public static boolean isValidRequest(CardCreationRequest request) {
         if (request == null) {
             return false;
@@ -19,6 +28,14 @@ public class CardValidator {
         }
     }
 
+    /**
+     * Validates that a card number is in the correct format.
+     * The format must be: BIN/IIN-XXXX-XXXX-XXXX, where BIN/IIN is predefined {@link CardBINorIIN},
+     * and each segment is 4 digits long.
+     *
+     * @param cardNumber the card number to validate
+     * @return true if the card number is valid, false otherwise
+     */
     public static boolean isValidCardNumber(String cardNumber) {
         if (cardNumber == null || cardNumber.length() != 19) {
             return false;

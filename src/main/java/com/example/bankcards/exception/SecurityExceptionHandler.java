@@ -10,10 +10,20 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+/**
+ * Custom exception handler for security and domain-specific exceptions.
+ * Provides meaningful HTTP responses for different types of errors.
+ */
 @Order(1)
 @RestControllerAdvice
 public class SecurityExceptionHandler {
 
+    /**
+     * Handles security-related exceptions such as JWT issues, login failures, or invalid user data.
+     *
+     * @param ex The exception that occurred
+     * @return A response with the appropriate HTTP status and message
+     */
     @ExceptionHandler({
             JwtException.class,
             LoginException.class,
@@ -33,6 +43,12 @@ public class SecurityExceptionHandler {
         return new ResponseEntity<>(ex.getMessage(), status);
     }
 
+    /**
+     * Handles exceptions related to card operations such as creation, existence, and status.
+     *
+     * @param ex The exception that occurred
+     * @return A response with the appropriate HTTP status and message
+     */
     @ExceptionHandler({
             CardException.class,
             CardStatusException.class,
@@ -59,24 +75,45 @@ public class SecurityExceptionHandler {
         return new ResponseEntity<>(ex.getMessage(), status);
     }
 
+    /**
+     * Handles access denied exceptions thrown by Spring Security.
+     *
+     * @return A response with HTTP status 403 (Forbidden)
+     */
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<String> handleAccessDeniedException() {
         return new ResponseEntity<>("Access denied", HttpStatus.FORBIDDEN);
     }
 
+    /**
+     * Handles bad credentials exceptions during authentication.
+     *
+     * @return A response with HTTP status 401 (Unauthorized)
+     */
     @ExceptionHandler(BadCredentialsException.class)
     public ResponseEntity<String> handleBadCredentialsException() {
         return new ResponseEntity<>("Bad credentials", HttpStatus.UNAUTHORIZED);
     }
 
+    /**
+     * Handles user already exists exceptions during registration.
+     *
+     * @param ex The exception that occurred
+     * @return A response with HTTP status 409 (Conflict)
+     */
     @ExceptionHandler(UserAlreadyExistsException.class)
     public ResponseEntity<String> handleUserAlreadyExistsException(UserAlreadyExistsException ex) {
         return new ResponseEntity<>(ex.getMessage(), HttpStatus.CONFLICT);
     }
 
+    /**
+     * Handles registration-related exceptions.
+     *
+     * @param ex The exception that occurred
+     * @return A response with HTTP status 400 (Bad Request)
+     */
     @ExceptionHandler(RegistrationException.class)
     public ResponseEntity<String> handleRegistrationException(RegistrationException ex) {
         return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
     }
-
 }

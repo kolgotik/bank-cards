@@ -21,15 +21,30 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 
+/**
+ * A Spring Security filter that processes JWT tokens from the request header
+ * and authenticates users if the token is valid.
+ */
 @Component
 @AllArgsConstructor
 @Slf4j
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
     public static final String BEARER_PREFIX = "Bearer ";
     public static final String HEADER_NAME = "Authorization";
+
     private final JwtUtil jwtUtil;
     private final UserDetailsService userDetailsService;
 
+    /**
+     * Processes each HTTP request to extract and validate the JWT token.
+     * If the token is valid, it creates an authentication object and sets it in the security context.
+     *
+     * @param request   the HTTP request
+     * @param response  the HTTP response
+     * @param filterChain the next filter in the chain
+     * @throws ServletException if a servlet exception occurs
+     * @throws IOException      if an I/O error occurs
+     */
     @Override
     protected void doFilterInternal(
             HttpServletRequest request,
@@ -38,22 +53,19 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     ) throws ServletException, IOException {
 
         try {
-            // Получаем токен из заголовка
+
             var authHeader = request.getHeader(HEADER_NAME);
             if (StringUtils.isEmpty(authHeader) || !StringUtils.startsWith(authHeader, BEARER_PREFIX)) {
                 filterChain.doFilter(request, response);
                 return;
             }
 
-            // Обрезаем префикс и получаем имя пользователя из токена
             var jwt = authHeader.substring(BEARER_PREFIX.length());
             var username = jwtUtil.extractUserName(jwt);
 
             if (StringUtils.isNotEmpty(username) && SecurityContextHolder.getContext().getAuthentication() == null) {
-                UserDetails userDetails = userDetailsService
-                        .loadUserByUsername(username);
+                UserDetails userDetails = userDetailsService.loadUserByUsername(username);
 
-                // Если токен валиден, то аутентифицируем пользователя
                 if (jwtUtil.isTokenValid(jwt, userDetails)) {
                     UsernamePasswordAuthenticationToken authenticationToken =
                             new UsernamePasswordAuthenticationToken(
@@ -83,6 +95,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         filterChain.doFilter(request, response);
     }
 
+    /**
+     * Sends a JSON-formatted error response with the specified message and HTTP status code.
+     *
+     * @param response the HTTP response to write the error to
+     * @param message  the error message
+     * @param status   the HTTP status code
+     * @throws IOException if an I/O error occurs while writing the response
+     */
     private void sendErrorResponse(HttpServletResponse response, String message, int status) throws IOException {
         response.setStatus(status);
         response.setContentType("application/json");

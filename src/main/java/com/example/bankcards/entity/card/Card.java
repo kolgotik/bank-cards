@@ -9,6 +9,10 @@ import lombok.Setter;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
+/**
+ * Represents a bank card entity stored in the database.
+ * Includes encryption for sensitive data like the card number.
+ */
 @Table(name = "cards")
 @Entity
 @Getter
@@ -18,27 +22,54 @@ public class Card {
     public Card() {
     }
 
+    /**
+     * The unique identifier of the card in the database.
+     */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    /**
+     * The card number, which is encrypted using {@link SimpleCardEncryptConverter}.
+     * Must be unique and non-null.
+     */
     @Convert(converter = SimpleCardEncryptConverter.class)
     @Column(name = "card_number", unique = true, nullable = false)
     private String cardNumber;
 
+    /**
+     * The name of the card owner.
+     * Must be non-null.
+     */
     @Column(nullable = false)
     private String ownerName;
 
+    /**
+     * The expiration date of the card in the format YYYY-MM-DD.
+     * Must be non-null.
+     */
     @Column(nullable = false)
     private LocalDate expirationDate;
 
+    /**
+     * The current status of the card (e.g., ACTIVE, BLOCKED).
+     * Must be non-null.
+     */
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private CardStatus status;
 
+    /**
+     * The current balance on the card.
+     * Must be non-null.
+     */
     @Column(nullable = false)
     private BigDecimal balance;
 
+    /**
+     * The user who owns this card.
+     * Relationship is maintained with lazy fetching and cascading operations.
+     */
     @ManyToOne(fetch = FetchType.LAZY, cascade =
             {
                     CascadeType.PERSIST, CascadeType.MERGE,
